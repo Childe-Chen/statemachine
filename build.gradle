@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '2.0.0.RELEASE'
+		springBootVersion = '1.5.4.RELEASE'
 	}
 	repositories {
 		mavenLocal()
@@ -36,6 +36,8 @@ repositories {
 
 
 dependencies {
+	compile('org.springframework.boot:spring-boot-starter:1.5.4.RELEASE')
 	compile("org.springframework.statemachine:spring-statemachine-core:1.2.6.RELEASE")
+	compile("ch.qos.logback:logback-classic:1.2.3")
 	compile("com.github.oxo42:stateless4j:2.5.0")
 }
