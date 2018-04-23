@@ -1,0 +1,41 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.0.RELEASE'
+	}
+	repositories {
+		mavenLocal()
+		maven {
+			url "http://repo.spring.io/libs-release"
+		}
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'base'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+version =  '0.1.0'
+archivesBaseName = 'gs-statemachine'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenLocal()
+
+	maven {
+		url "http://repo.spring.io/libs-release"
+	}
+
+	mavenCentral()
+}
+
+
+dependencies {
+	compile("org.springframework.statemachine:spring-statemachine-core:1.2.6.RELEASE")
+	compile("com.github.oxo42:stateless4j:2.5.0")
+}
