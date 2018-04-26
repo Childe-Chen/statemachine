@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.4.RELEASE'
+		springBootVersion = '2.0.1.RELEASE'
 	}
 	repositories {
 		mavenLocal()
@@ -36,8 +36,22 @@ repositories {
 
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter:1.5.4.RELEASE')
-	compile("org.springframework.statemachine:spring-statemachine-core:1.2.6.RELEASE")
+	compile('org.springframework.boot:spring-boot-starter:2.0.1.RELEASE'){
+		exclude module: 'logback-classic'
+		exclude module: 'log4j-to-slf4j'
+	}
+
+	compile("org.springframework.statemachine:spring-statemachine-core:2.0.1.RELEASE")
+
+	compile("com.github.oxo42:stateless4j:2.5.0") {
+		exclude module: 'log4j-to-slf4j'
+		exclude module: 'slf4j-jdk14'
+	}
+
+	compile('org.squirrelframework:squirrel-foundation:0.3.8'){
+		exclude module: 'slf4j-log4j12'
+		exclude module: 'log4j'
+	}
+
 	compile("ch.qos.logback:logback-classic:1.2.3")
-	compile("com.github.oxo42:stateless4j:2.5.0")
 }

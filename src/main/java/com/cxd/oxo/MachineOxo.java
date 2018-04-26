@@ -1,9 +1,12 @@
 package com.cxd.oxo;
 
 import com.cxd.event.Trigger;
+import com.cxd.exception.BizException;
 import com.cxd.state.States;
 import com.github.oxo42.stateless4j.StateMachine;
 import com.github.oxo42.stateless4j.StateMachineConfig;
+import com.github.oxo42.stateless4j.delegates.FuncBoolean;
+import com.github.oxo42.stateless4j.transitions.Transition;
 import com.github.oxo42.stateless4j.triggers.TriggerWithParameters1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +26,17 @@ public class MachineOxo {
         StateMachineConfig<States, Trigger> phoneCallConfig = new StateMachineConfig<>();
 
         phoneCallConfig.configure(States.OffHook)
-                .permit(Trigger.CallDialed, States.Ringing);
+                .onEntry((Transition<States, Trigger> entryTransition) -> {
+                    log.warn("States.OffHook entry {}", entryTransition.isReentry());
+                }).permitIf(Trigger.CallDialed, States.Ringing, () -> {
+                        throw new BizException("故意的");
+                    }
+                );
 
         phoneCallConfig.configure(States.Ringing)
+                .onEntry((Transition<States, Trigger> entryTransition) -> {
+                    log.warn("States.Ringing entry {}", entryTransition.isReentry());
+                })
                 .permit(Trigger.HungUp, States.OffHook)
                 .permit(Trigger.CallConnected, States.Connected);
 
@@ -37,8 +48,10 @@ public class MachineOxo {
                 .permit(Trigger.PlacedOnHold, States.OnHold);
 
         phoneCallConfig.configure(States.OnHold)
-                .permitDynamic(new TriggerWithParameters1(Trigger.BOON, String.class), (String s) -> {
-                    log.info(s);
+                .onExit((Transition<States, Trigger> triggerTransition) ->
+                    log.warn("States.OnHold exit {}", triggerTransition.getDestination())
+                ).permitDynamic(new TriggerWithParameters1(Trigger.BOON, String.class), (String s) -> {
+                    log.warn("States.OnHold permit {}", s);
                     return States.OffHook;
                 });
 
@@ -46,17 +59,24 @@ public class MachineOxo {
 
         // ...
 
-        StateMachine<States, Trigger> phoneCall = new StateMachine<>(States.OnHold, phoneCallConfig);
+        StateMachine<States, Trigger> phoneCall = new StateMachine<>(States.OffHook, phoneCallConfig);
 
         phoneCall.onUnhandledTrigger((States state,Trigger trigger) -> {
-            System.out.println(state.name() + "--" + trigger.name());
+            log.error(state.name() + "--" + trigger.name());
         });
 
-        log.info("before fire {}",phoneCall.getState());
-        log.warn("can fire {} ", phoneCall.canFire(Trigger.BOON));
-        TriggerWithParameters1 parameters1 = new TriggerWithParameters1<String,States,Trigger>(Trigger.BOON, String.class);
-        phoneCall.fire(parameters1,"e");
-        log.info("after fire {}",phoneCall.getState());
+
+//        TriggerWithParameters1 parameters1 = new TriggerWithParameters1<String,States,Trigger>(Trigger.BOON, String.class);
+//        phoneCall.fire(parameters1, "ssss");
+
+
+        try {
+            phoneCall.fire(Trigger.CallDialed);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        log.info("current state {}", phoneCall.getState().name());
 
     }
 

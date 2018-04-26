@@ -2,6 +2,8 @@ package com.cxd.spring;
 
 import com.cxd.event.Events;
 import com.cxd.state.States;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.config.EnableStateMachine;
@@ -13,9 +15,10 @@ import org.springframework.statemachine.state.State;
 
 import java.util.EnumSet;
 
-@Configuration
 @EnableStateMachine
 public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<States,Events> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineConfig.class);
 
     @Override
     public void configure(StateMachineConfigurationConfigurer<States, Events> config) throws Exception {
@@ -41,7 +44,7 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<States
         return new StateMachineListenerAdapter<States, Events>() {
             @Override
             public void stateChanged(State<States, Events> from, State<States, Events> to) {
-                System.out.println("State change to " + to.getId());
+                LOGGER.warn("State change from {} to {}",from == null ? "init" : from.getId(), to.getId());
             }
         };
     }
