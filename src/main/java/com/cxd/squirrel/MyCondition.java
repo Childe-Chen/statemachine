@@ -17,7 +17,7 @@ public class MyCondition implements Condition<MyContext> {
 
     @Override
     public boolean isSatisfied(MyContext context) {
-        LOGGER.warn(context.toString());
+        LOGGER.warn("isSatisfied {}", context.toString());
 
         if (!"yes".equals(context.getNo())) {
             throw new BizException("context param error");

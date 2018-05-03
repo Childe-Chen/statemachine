@@ -21,13 +21,8 @@ public class Application implements CommandLineRunner {
     public void run(String... args) throws Exception {
         stateMachine.sendEvent(Events.CallDialed);
         stateMachine.sendEvent(Events.CallConnected);
+        stateMachine.sendEvent(Events.HungUp);
 
-        if (!stateMachine.isComplete()) {
-            Thread.sleep(1000 * 2);
-        }
-
-
-        stateMachine.stop();
     }
 
     public static void main(String[] args) {

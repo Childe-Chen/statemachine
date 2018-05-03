@@ -6,6 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.statemachine.StateContext;
+import org.springframework.statemachine.StateMachineSystemConstants;
 import org.springframework.statemachine.config.EnableStateMachine;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.*;
@@ -36,7 +41,12 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<States
 
         transitions.withExternal().source(States.OffHook).target(States.Ringing).event(Events.CallDialed)
                 .and()
-                .withExternal().source(States.Ringing).target(States.Connected).event(Events.CallConnected);
+                .withExternal().source(States.Ringing).target(States.Connected).event(Events.CallConnected)
+                .and()
+                .withExternal().source(States.Connected).target(States.OffHook).event(Events.HungUp).guard((StateContext<States, Events> context) -> {
+//                    context.getMessage();
+            return true;
+        });
     }
 
     @Bean
@@ -47,5 +57,12 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<States
                 LOGGER.warn("State change from {} to {}",from == null ? "init" : from.getId(), to.getId());
             }
         };
+    }
+
+    @Bean(name = StateMachineSystemConstants.TASK_EXECUTOR_BEAN_NAME)
+    public TaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(2);
+        return taskExecutor;
     }
 }
